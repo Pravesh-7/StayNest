@@ -3,21 +3,12 @@ import Room from "../models/Room.js";
 import Hotel from "../models/Hotel.js";
 
 // API to create a new room for a hotel
-export const createRoom = async (req, res) => {
+export const createRoom = async (req, res, next) => {
   try {
     const { roomType, pricePerNight, amenities } = req.body;
 
-    //   // ADD THESE 2 DEBUG LINES
-    // console.log("req.user._id =>", req.auth._id);
-    // console.log("All hotels =>", await Hotel.find({}));
-
-
     const hotel = await Hotel.findOne({ owner: req.user._id });
-
-    console.log(hotel);
-    
-
-    if (!hotel) return res.json({ success: false, message: "No Hotel found" });
+    if (!hotel) return res.status(404).json({ success: false, message: "No Hotel found" });
 
     // upload images to cloudinary
     const uploadImages = req.files.map(async (file) => {
@@ -35,13 +26,13 @@ export const createRoom = async (req, res) => {
       amenities: JSON.parse(amenities),
       images,
     });
-    res.json({ success: true, message: "Room created successfully" });
+    res.status(201).json({ success: true, message: "Room created successfully" });
   } catch (error) {
-    res.json({ success: false, message: error.message });
+    next(error);
   }
 };
 // API to get all rooms
-export const getRooms = async (req, res) => {
+export const getRooms = async (req, res, next) => {
   try {
     const rooms = await Room.find({ isAvailable: true })
       .populate({
@@ -54,11 +45,11 @@ export const getRooms = async (req, res) => {
       .sort({ createdAt: -1 });
     res.json({ success: true, rooms });
   } catch (error) {
-    rep.json({ success: false, messsage: error.message });
+    next(error);
   }
 };
 // API to get all rooms for specific hotel
-export const getOwnerRooms = async (req, res) => {
+export const getOwnerRooms = async (req, res, next) => {
   try {
     const hotelData = await Hotel.findOne({ owner: req.user._id });
     const rooms = await Room.find({ hotel: hotelData._id.toString() }).populate(
@@ -66,12 +57,12 @@ export const getOwnerRooms = async (req, res) => {
     );
     res.json({ success: true, rooms });
   } catch (error) {
-    res.json({ success: false, message: error.message });
+    next(error);
   }
 };
 
 // API to toggle availability of a room
-export const toggleRoomAvailability = async (req, res) => {
+export const toggleRoomAvailability = async (req, res, next) => {
   try {
     const { roomId } = req.body;
     const roomData = await Room.findById(roomId);
@@ -79,6 +70,6 @@ export const toggleRoomAvailability = async (req, res) => {
     await roomData.save();
     res.json({ success: true, message: "Room availability Updated" });
   } catch (error) {
-    res.json({ success: false, message: error.message });
+    next(error);
   }
 };

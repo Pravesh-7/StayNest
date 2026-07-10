@@ -1,16 +1,16 @@
-export const getUserData = async (req, res) => {
+export const getUserData = async (req, res, next) => {
   try {
     const role = req.user.role;
     const recentSearchedCities = req.user.recentSearchedCities;
     res.json({ success: true, role, recentSearchedCities });
   } catch (error) {
-    res.json({ success: false, message: error.message });
+    next(error);
   }
 };
 
 //Store user recent searched cities
 
-export const storeRecentSearchedCities = async (req, res) => {
+export const storeRecentSearchedCities = async (req, res, next) => {
   try {
     const { recentSearchedCity } = req.body;
     const user = await req.user;
@@ -23,6 +23,6 @@ export const storeRecentSearchedCities = async (req, res) => {
     await user.save();
     res.json({ success: true, message: "City added" });
   } catch (error) {
-    res.json({ success: false, message: error.message });
+    next(error);
   }
 };

@@ -6,6 +6,15 @@ import { toast } from "react-hot-toast";
 
 axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
 
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const message = error.response?.data?.message || error.message || "An unexpected error occurred";
+    toast.error(message);
+    return Promise.reject(error);
+  }
+);
+
 const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
@@ -25,11 +34,9 @@ export const AppProvider = ({ children }) => {
       const { data } = await axios.get("/api/rooms");
       if (data.success) {
         setRooms(data.rooms);
-      } else {
-        toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      console.error("[Fetch Rooms Error]", error);
     }
   };
 
@@ -40,16 +47,15 @@ export const AppProvider = ({ children }) => {
       });
       if (data.success) {
         setIsOwner(data.role === "hotelOwner");
-
         setSearchedCities(data.recentSearchedCities);
-      } else {
-        // Retry Fetching User Details after 5 seconds
+      }
+    } catch (error) {
+      // Avoid infinite retry loops on 401s or 404s, but retry on network errors if necessary
+      if (!error.response) {
         setTimeout(() => {
           fetchUser();
         }, 5000);
       }
-    } catch (error) {
-      toast.error(error.message);
     }
   };
 

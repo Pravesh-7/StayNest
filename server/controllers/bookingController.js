@@ -20,7 +20,7 @@ const checkAvailability = async ({ checkInDate, checkOutDate, room }) => {
 
 // API to check availability of room
 // POST /api/bookings/check-availability
-export const checkAvailabilityAPI = async (req, res) => {
+export const checkAvailabilityAPI = async (req, res, next) => {
   try {
     const { room, checkInDate, checkOutDate } = req.body;
     const isAvailable = await checkAvailability({
@@ -30,13 +30,13 @@ export const checkAvailabilityAPI = async (req, res) => {
     });
     res.json({ success: true, isAvailable });
   } catch (error) {
-    res.json({ success: false, isAvailable });
+    next(error);
   }
 };
 
 // API to create a new booking
 // POST /api/bookings/book
-export const createBooking = async (req, res) => {
+export const createBooking = async (req, res, next) => {
   try {
     const { room, checkInDate, checkOutDate, guests } = req.body;
     const user = req.user._id;
@@ -48,7 +48,7 @@ export const createBooking = async (req, res) => {
     });
 
     if (!isAvailable) {
-      return res.json({ success: false, message: "Room is not available" });
+      return res.status(400).json({ success: false, message: "Room is not available" });
     }
 
     // Get totalPrice from Room
@@ -104,18 +104,17 @@ export const createBooking = async (req, res) => {
     try {
       await transporter.sendMail(mailOptions);
     } catch (mailError) {
-      console.log("Mail error:", mailError.message); // don't crash if mail fails
+      console.error("[Mail Error]", mailError.message); // don't crash if mail fails
     }
-    res.json({ success: true, message: "Booking created successfully" });
+    res.status(201).json({ success: true, message: "Booking created successfully" });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: "Failed to create booking" });
+    next(error);
   }
 };
 
 // API to get all bookings for a user
 // GET /api/bookings/user
-export const getUserBookings = async (req, res) => {
+export const getUserBookings = async (req, res, next) => {
   try {
     const user = req.user._id;
     const bookings = await Booking.find({ user })
@@ -123,15 +122,15 @@ export const getUserBookings = async (req, res) => {
       .sort({ createdAt: -1 });
     res.json({ success: true, bookings });
   } catch (error) {
-    res.json({ success: false, message: "Failed to fetch bookings" });
+    next(error);
   }
 };
 
-export const getHotelBookings = async (req, res) => {
+export const getHotelBookings = async (req, res, next) => {
   try {
     const hotel = await Hotel.findOne({ owner: req.user._id });
     if (!hotel) {
-      return res.json({ success: false, message: "No Hotel found" });
+      return res.status(404).json({ success: false, message: "No Hotel found" });
     }
     const bookings = await Booking.find({ hotel: hotel._id })
       .populate("room hotel user")
@@ -148,9 +147,6 @@ export const getHotelBookings = async (req, res) => {
       dashboardData: { totalBookings, totalRevenue, bookings },
     });
   } catch (error) {
-    res.json({
-      success: false,
-      message: "failed to get hotel bookings",
-    });
+    next(error);
   }
 };
