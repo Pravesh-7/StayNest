@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
-import { assets, facilityIcons, roomsDummyData } from "../assets/assets";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { assets, facilityIcons } from "../assets/assets";
+import { useSearchParams } from "react-router-dom";
 import StarRating from "../components/StarRating";
 import { useAppContext } from "../context/AppContext";
 
@@ -231,9 +231,8 @@ text-sm"
               </div>
               {/* Room Price per Night */}
               <p className="text-xl font-medium text-gray-700">
-                ${getDynamicPrice(room.pricePerNight)} /night
-              </p>{" "}
-              I
+                {currency}{getDynamicPrice(room.pricePerNight)} /night
+              </p>
             </div>
           </div>
         ))}
@@ -255,7 +254,7 @@ max-lg:mb-8 min-lg:mt-16"
             >
               {openFilter ? "HIDE" : "SHOW"}
             </span>
-            <span className="hidden lg-block">CLEAR</span>
+            <span className="hidden lg:block" onClick={clearFilters}>CLEAR</span>
           </div>
         </div>
 

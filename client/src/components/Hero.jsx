@@ -7,7 +7,6 @@ const Hero = () => {
   const [destination, setDestination] = useState("");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
-  const [guests, setGuests] = useState(1);
 
   const onSearch = async (e) => {
     e.preventDefault();

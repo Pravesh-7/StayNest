@@ -8,7 +8,6 @@ const ListRoom = () => {
   const [rooms, setRooms] = useState([]);
 
   const { axios, getToken, user } = useAppContext();
-  // Fetch Rooms of the Hotel Owner
   const fetchRooms = async () => {
     try {
       const { data } = await axios.get("/api/rooms/owner", {
@@ -16,26 +15,25 @@ const ListRoom = () => {
       });
       if (data.success) {
         setRooms(data.rooms);
-      } else {
-        toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      console.error(error);
     }
   };
 
-  // Toggle Availability of the Room
   const toggleAvailability = async (roomId) => {
-    const { data } = await axios.post(
-      "/api/rooms/toggle-availability",
-      { roomId },
-      { headers: { Authorization: `Bearer ${await getToken()}` } },
-    );
-    if (data.success) {
-      toast.success(data.message);
-      fetchRooms();
-    } else {
-      toast.error(data.message);
+    try {
+      const { data } = await axios.post(
+        "/api/rooms/toggle-availability",
+        { roomId },
+        { headers: { Authorization: `Bearer ${await getToken()}` } },
+      );
+      if (data.success) {
+        toast.success(data.message);
+        fetchRooms();
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -43,7 +41,7 @@ const ListRoom = () => {
     if (user) {
       fetchRooms();
     }
-  }, [user]);
+  }, [user, axios, getToken]);
 
   return (
     <div>

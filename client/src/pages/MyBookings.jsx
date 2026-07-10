@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import Title from "../components/Title";
+import toast from "react-hot-toast";
 import { assets } from "../assets/assets";
 import { useState } from "react";
 import { useAppContext } from "../context/AppContext";

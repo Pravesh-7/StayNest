@@ -79,9 +79,7 @@ const AddRoom = () => {
         toast.error(data.message);
       }
     } catch (error) {
-      console.log(error.message);
-      
-      toast.error(data.message);
+      console.error(error);
     } finally {
       setLoading(false);
     }
